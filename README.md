@@ -76,14 +76,17 @@ Search for this, and you will find!
           <li><a href="#direct-conversion-errors">Direct Conversion Errors</a></li>
           <ul>
             <li><a href="#geodetic-vs-utm-distance-errors-with-matched-station">Geodetic vs UTM Distance Errors with Matched Station</a></li>
-            <li><a href="#geodesic-distance">Geodesic distance</a></li>
-            <li><a href="#station-distance">Station distance</a></li>
+            <li><a href="#lla-versus-enu-distance-errors-with-matched-station">LLA vers ENU Distance Errors with Matched Station</a></li>
+            <li><a href="#lla-versus-enu-station-errors-with-matched-position">LLA versus ENU Station Errors with Matched Position</a></li>
           </ul>                    
-          <li><a href="#ll-coordinates">LL Coordinates</a></li>
-          <li><a href="#ecef-coordinates">ECEF Coordinates</a></li>
-          <li><a href="#enu-coordinates">ENU Coordinates</a></li>
-          <li><a href="#utm-coordinates">UTM Coordinates</a></li>
-          <li><a href="#sth-coordinates">STH Coordinates</a></li>
+          <li><a href="#elevation-error">Elevation Error</a></li>
+          <li><a href="#error-analysis-in-merging-traffic-sims-and-vehicle-trajectories">Error Analysis in Merging Traffic Sims and Vehicle Trajectories</a></li>
+          <ul>
+            <li><a href="#lla-to-utm-to-enu-to-lla">LLA to UTM to ENU to LLA</a></li>
+            <li><a href="#lla-to-utm-to-lla">LLA to UTM to LLA</a></li>
+            <li><a href="#lla-to-enu-to-lla">LLA to ENU to LLA</a></li>
+          </ul>   
+          <li><a href="#known-errors">Known Errors</a></li>
       </ul>
     </li>
     <li><a href="#installation">Installation</a>
@@ -148,7 +151,6 @@ Most of the coordinate systems described below follow the Open Geospatial Consor
  A spherical coordinate system is a coordinate system for 3D space where the position of a point is specified by three numbers: the radial distance (r) of that point from a fixed origin, its polar angle (&phi;) measured from a fixed zenith direction, and the azimuthal angle (&theta;) of its orthogonal projection on a reference plane that passes through the origin and is orthogonal to the zenith, measured from a fixed reference direction on that plane. Because the Earth is not a true sphere, spherical coordinates are rarely used outside of orbital maneuvers.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\SphericalCoordinates_whiteFill.png " alt="spherical coordinates" width="267" height="267">
 <figcaption>Fig.1 - Spherical coordinates.</figcaption>
 </p>
@@ -165,7 +167,6 @@ LLA stands for a coordinate system that uses Latitude, Longitude, and Altitude, 
 > * **Altitude**: Altitude of a point is defined as height above the Earth’s surface. It is denoted by _h_ and measured in meters.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\LLACoordinates.png " alt="LLA coordinates" width="267" height="267">
 <figcaption>Fig.2 - LLA coordinates.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -194,7 +195,6 @@ This leads to several computed parameters such as:
 > * The first eccentricity squared, e²= 6.69437999014x10-3.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\WGS84.png " alt="WGS84 coordinates" width="267" height="267">
 <figcaption>Fig.3 - LLA coordinates.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -206,7 +206,6 @@ This leads to several computed parameters such as:
 The LL coordinate system system in WGS84 is actually the LLA coordinate system with altitude at every point equals zero i.e., h = 0. This is commonly used in "flattened" maps, which are often used for road maps (for example, Open Street Maps). One can add height information back into LL to produce LLA coordinates. For examples and methods on how to do this, see the Path Class library within IVSG.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\LLcoordinates.png " alt="LL coordinates" width="652" height="267">
 <figcaption>Fig.4 (left) - LL coordinates are similar to LLA, but with height set to zero; Fig.5 (right)- LL coordinates are LLA with all heights at sea level.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -225,7 +224,6 @@ The conventional right-handed coordinate system puts:
 > * The Y axis passing through extending from 90 degrees west longitude at the Equator (negative) to 90 degrees east longitude at the Equator (positive)
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\ECEFcoordinates.png " alt="ECEF coordinates" width="332" height="267">
 <figcaption>Fig.6 - ECEF coordinates are a cartesian frame that moves with the earth, useful for intermediate conversions between coordinate systems.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -249,7 +247,6 @@ There are two kinds of conventions for the frames:
 * In many targeting and tracking applications, the local ENU Cartesian coordinate system is far more intuitive and practical than ECEF or geodetic coordinates. The local ENU coordinates are formed from a plane tangent to the Earth's surface fixed to a specific location and hence it is sometimes known as a local tangent or local geodetic plane. By convention, the east axis is labeled x, the north y, and the up z.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\ENUcoordinates.png " alt="ENU coordinates" width="332" height="267">
 <figcaption>Fig.7 - ENU coordinates are a local cartesian frame whose representation is strongly affected by the local origin.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -271,7 +268,6 @@ The 2D Transverse Mercator Projection, known more generally as the Universal Tra
 UTM coordinates are significantly distorted (non-isometric) and should be avoided when possible.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\UTMcoordinates.png " alt="UTM coordinates" width="617" height="267">
 <figcaption>Fig.8 - UTM coordinates are a cylindrical rather than spherical projection, resulting in severe distortion.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -292,7 +288,6 @@ The s-coordinate is a right-handed coordinate system. The following degrees of f
 > * h – "height", usually measured up from the road surface as zero.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\STHcoordinates.png " alt="STH coordinates" width="625" height="267">
 <figcaption>Fig.9 - STH coordinates align with a particular reference path.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -305,7 +300,6 @@ And orientation can be defined:
 
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\STHorientations.png " alt="STH orientations" width="625" height="267">
 <figcaption>Fig.10 - STH orientations and their denoted name conventions.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -328,7 +322,6 @@ The Euclidean distance between two points in either the plane or 3-dimensional s
 The shortest path between two points on the earth, customarily treated as an ellipsoid of revolution, is called a geodesic. A geodesic is the natural “straight line”, deﬁned as the line of minimum curvature, pinned to the surface of the earth.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\EuclideanVsGeodesicDistance.png " alt="Euclidean Vs Geodesic Distance" width="358" height="360">
 <figcaption>Fig.11 - Comparison of Euclidean and Geodesic distances.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -338,7 +331,6 @@ The shortest path between two points on the earth, customarily treated as an ell
 The station of a point B wrt A is the distance between A and B measured along the path. The distance measured along the path is the cumulative sum of distance metrics between intermediate points on the path. The distance metric is Euclidean in ENU, is not Euclidian OR Geodesic in UTM coordinate systems, and is Geodesic in LLA coordinate systems.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\StationDistance.jpg " alt="Euclidean Vs Geodesic Distance" width="1075" height="350">
 <figcaption>Fig.12 - Station distance usually requires approximation of a curve length by a set of segments.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -351,11 +343,11 @@ The station of a point B wrt A is the distance between A and B measured along th
 The following sections analyze the conversion errors between different coordinate frames, both in absolute distance and sometimes in station distance. For reference, the area tested extends over the largest test areas currently used within IVSG at Penn State, from the turn-around location near Altoona, to the State College area.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\StateCollegeToAltoona.png" alt="State College to Altoona Map" width="523" height="404">
 <figcaption>Fig.13 - The State College to Altoona route (and back) represents the largest regular testing area used by IVSG, and this 50km route is the test area for the calculations below.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
 </pre>
+
 
 The Geodesic calculations used the methods described in:
 ["Algorithms for geodesics" by Charles F.F. Karney](https://link.springer.com/article/10.1007/s00190-012-0578-z) with the WGS84 reference.
@@ -367,7 +359,6 @@ The results illustrate that UTM corodinate systems are a poor choice if position
 Here, error in distance is measured from Geodetic (truth) to UTM (conversion). The resulting distance error ($e_d = d_{Geodetic} - d_{UTM}$) is approximately 14m at 50km of travel. Distance in Geodetic is the arc length, and the distance is the chord length in UTM. The altitude is forced to zero, and the station coordinates are matched to within 0.1 meters.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\GeodeticVsUTM.png" alt="Geodetic versus UTM" width="523" height="404">
 <figcaption>Fig.14 - The distance errors that occur when matching stations after converting from Geodetic (true) to UTM.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -380,7 +371,6 @@ Here, error in distance is measured from Geodetic (truth) to UTM (conversion). T
 Here, error in station is measured from Geodetic (truth) to UTM (conversion) at the same distances. The resulting station error ($e_d = s_{Geodetic} - s_{UTM}$) is approximately 13m at 50km of travel. The station in Geodetic is the cumulative arc length, and it is cumulative chord length in UTM. The altitude is forced to zero, and the distances are matched to within 0.1 meters.
 
 <pre align="center">
- <p align="center">
 <img src=".\Images\GeodeticVsUTMmatcheddistance.png" alt="Geodetic versus UTM matched distance" width="523" height="404">
 <figcaption>Fig.15 - The distance errors that occur when matching distances after converting from Geodetic (true) to UTM.</figcaption>
 <!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
@@ -388,6 +378,151 @@ Here, error in station is measured from Geodetic (truth) to UTM (conversion) at 
 
 
 <a href="#wide-area-coordinate-systems">Back to top</a>
+
+### LLA versus ENU Distance Errors with Matched Station
+Here, as a case study, a series of points measured in 0.1 meter intervals, with zero altitude, are produced for teh segment of I-99 from Altoona to State College to compare distance and station. The points are produced in LLA, then calculated to ENU with the distance calculated at each point. The ENU distance is the chord length between origin to destination (e.g. Euclidian distance), whereas the geodetic distance is the arc length. This plot below shows the difference between the distance calculated under ENU and Geodetic coordinate from each point in the path to Altoona. The max distance difference is 0.3 m within 70km range, and is within 1cm within a 10km range from the origin.
+
+<pre align="center">
+<img src=".\Images\LLAvsENU.png" alt="LLA versus ENU distances, for matched stations" width="523" height="404">
+<figcaption>Fig.16 - LLA versus ENU distances, for matched stations.</figcaption>
+<!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
+</pre>
+
+
+<a href="#wide-area-coordinate-systems">Back to top</a>
+
+
+### LLA versus ENU Station Errors with Matched Position
+Here, we start with a series of points with interval distance of 0.1m, altitude is zero, in the segment of I99 from Altoona to State College to compare the station calculations calculated two different ways, both using matched position points. The Geodesic coordinates are assumed to be "truth", whereas the ENU station calculations are assumed to have error due to the non-spherical assumptions therein. Specifically, ENU Station is calculated by connecting a finite number of points on the curve using straight line segments to create a polygonal path decimated at 0.1 meter intervals. The Geo Station is just the accumulated sum of the curve segment lengths.
+
+Note: MATLAB uses geodetic2enu() to convert the LLA to ENU, and enu2geodetic back. If one converts LLA to ENU and then convert the ENU back to LLA, comparing the original LLA values and loop back values, the LL degree error is about 10^(-14), the A elevation error is 10^(-9) meter. Thus, the forward/backward conversions very closely agree, but do produce a measureable error.
+
+This plot shows the difference between the station calculated under ENU and Geodetic coordinate over large scales. The max distance difference is only about 0.15mm within the 50km range.
+
+
+<pre align="center">
+<img src=".\Images\LLAvsENUstation.png" alt="LLA versus ENU stations, for matched positions" width="523" height="404">
+<figcaption>Fig.17 - LLA versus ENU stations, for matched positions.</figcaption>
+<!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
+</pre>
+
+Over larger step-size scales, for example if the interval distance is 100m instead of 0.1m, the accumulation of errors is very small (as an error occurs at each step). In this case, the station distance errors are imperceptible. This plot shows the difference between the station calculated under ENU and Geodetic coordinate with interval of 100 meters. The max distance difference is  only about 2.5*10^(-7) m within 50km range.
+
+<pre align="center">
+<img src=".\Images\LLAvsENUstation_largeInterval.png" alt="LLA versus ENU stations, for matched positions and a large 100 m interval" width="523" height="404">
+<figcaption>Fig.18 - LLA versus ENU stations, for matched positions and a large 100m interval.</figcaption>
+<!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
+</pre>
+
+Notes: theoretically, for two points on earth, their Euclidean distance under ENU frame should always be smaller than the Geodesic distance. However, if one examines the distance difference plot carefully near the origin, negative values occur in close range, which is not expected. The reason, in short, is that the computational accuracy of geodesic distances is low if the points are very close to each other.
+
+
+<pre align="center">
+<img src=".\Images\LLAvsENUstation_largeInterval_nearOrigin.png" alt="LLA versus ENU stations, for matched positions and a large 100 m interval, near the origin" width="523" height="404">
+<figcaption>Fig.19 - LLA versus ENU stations, for matched positions and a large 100m interval, near the origin.</figcaption>
+<!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
+</pre>
+
+In general, we found that for calculating station coordinates using ENU coordinates is better than LLA or Geodesic calculations. If we want to calculate the station under geodetic coordinates, choose a larger interval around 100 meters ore more to achieve the closest results with ENU.
+
+## Elevation Error
+Question: All calculations above ignore changes in elevation. How does one calculate the Geodesic distance to include elevation-related distances? 
+
+Answer: The term "geodesic" refers to a "straight line" on the curved ellipsoid/sphere surface. The geodesic distance is a sphere surface 2D distance, which is not applicable for the distance with elevation. 
+
+When calculating the distance between two points with elevation, one can consider it with two methods: 
+
+1. For small distances, one can convert LLA to ENU or ECEF, and then just use the pythagorean theorem to calculate the true distance value with elevation. Keep in mind that a straight line in 3D, over long distances, can pass through the Earth, so this calculation is only useful for 3D "line of sight" types of problems for generally short distances, e.g. if one can physically "see" the elevated point from the point being measured.
+
+2. For large distance, one can use the geodesic distance algorithm by ignoring the altitude difference, or one can take the average altitude as a constant radius. For example, if the paths are 1-2km long with altitude varying on the order of 100m, one will observe about ~5m change on average versus using the WGS84 ellipsoid unmodified. Note: this variation will cause error.
+
+Thus, over long distances, one should rarely calculate the straight-line distance between two far points. Rather, one should focus on the distance along a path with small intervals. This suggests a more general strategy: to convert LLA into ENU, then calculate the sum of small interval Euclidean distances along segments. 
+
+Useful References:
+
+https://stackoverflow.com/questions/1108965/taking-altitude-into-account-when-calculating-geodesic-distance
+
+https://gis.stackexchange.com/questions/277171/compute-distance-between-two-point-from-longitude-latitude-height/278753
+
+
+<a href="#wide-area-coordinate-systems">Back to top</a>
+
+## Error Analysis in Merging Traffic Sims and Vehicle Trajectories
+
+Traffic simulations typically operate in UTM coordinates, most vehicle simulations are in ENU or LLA coordinates, and results (such as friction) are typically stored in LLA coordinates. There are three methods that have been tested to merge traffic simulation results with vehicle trajectories that manage these transforms.
+
+1. LL(A) to UTM to ENU to LLA
+2. LL(A) to UTM to LLA
+3. LLA to ENU to LLA
+
+Each of these is analyzed below:
+
+### LLA to UTM to ENU to LLA
+In this method, the traffic simulation (AIMSUN) represents a network in the UTM coordinate system. While importing road-network as an OSM file (LL), the coordinate system will be set automatically to a projected UTM zone using WGS 84. The error induced by this coordinate transformation is large, and it cannot be removed in the later steps.
+
+The Road Traffic ST tables contain vehicle trajectory information in both LLA and ENU coordinate systems, and thus a converter is needed from UTM to LLA/ENU for this representation. 
+
+The Friction Grid ST table contains TRUE friction for road geometry expressed in both LLA & ENU coordinate system. This ensures that there is a strong correlation between road geometry, friction grid, and vehicle trajectory. But a small error is induced by the coordinate transformation from UTM to ENU.
+
+The vehicle simulations are run in ENU coordinates and their results transformed from ENU to LLA.
+
+The VD & Friction tables contain friction estimate in LLA and ENU coordinates.
+
+
+<pre align="center">
+<img src=".\Images\LLAtoUTMtoENUtoLLA.png" alt="LLA versus ENU stations, for matched positions and a large 100 m interval, near the origin" width="900" height="175">
+<figcaption>Fig.20 - Error analysis for conversion path of LLA to UTM to ENU to to LLA.</figcaption>
+<!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
+</pre>
+
+### LLA to UTM to LLA
+
+In this method, just as in the previous one, the traffic simulation (AIMSUN) represents a network in the UTM coordinate system. While importing road-network as an OSM file (LL), the coordinate system will be set automatically to a projected UTM zone using WGS 84. The error induced by this coordinate transformation is large, and it cannot be removed in the later steps.
+
+The Road Traffic ST tables contain vehicle trajectory information in the UTM coordinate system. 
+
+The Friction Grid ST tables can contain TRUE friction for road geometry expressed in the UTM coordinate system. This ensures the correlation between road geometry, friction grid, and vehicle trajectory.
+
+The Vehicle simulations need to be set-up to run in UTM coordinates, but they are presently set-up to run in ENU. Presently, no vehicle simulation software exists within IVSG for UTM simulations.
+
+The VD & Friction tables contain friction estimate in LLA coordinates.
+
+
+<pre align="center">
+<img src=".\Images\LLAtoUTMtoLLA.png" alt="LLA to UTM to LLA" width="650" height="175">
+<figcaption>Fig.21 - Error analysis for conversion path of LLA to UTM to LLA.</figcaption>
+<!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
+</pre>
+
+### LLA to ENU to LLA
+
+In this method, the traffic simulation (Aimsun) represents a road-network in the cartesian coordinate system, which is NOT the UTM coordinates in the other methods. 
+
+The road-network mapped in LLA can be imported in ENU coordinates using RoadXML. The error induced in LLA to ENU transformation is smaller than in LL to UTM transformation.
+
+The Road Traffic ST tables contain vehicle trajectory information in the ENU coordinate system.
+
+The Friction Grid ST tables contain TRUE friction for road geometry expressed in the ENU coordinate system. This ensure the correlation between road geometry, friction grid, and vehicle trajectory.
+
+The Vehicle simulations are set-up to run in ENU coordinates.
+
+The VD & Friction tables contain friction estimate in LLA coordinates.
+
+Option 3 is the ideal choice with minimal error, but as importing real-world data using RoadXML is difficult. Option 1 is preferred for now.
+
+
+<pre align="center">
+<img src=".\Images\LLAtoENUtoLLA.png" alt="LLA to ENU to LLA" width="900" height="175">
+<figcaption>Fig.22 - Error analysis for conversion path of LLA to ENU to LLA.</figcaption>
+<!--font size="-2">Photo by <a href="https://unsplash.com/ko/@samuelchenard?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Samuel Chenard</a> on <a href="https://unsplash.com/photos/Bdc8uzY9EPw?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></font -->
+</pre>
+
+<a href="#wide-area-coordinate-systems">Back to top</a>
+
+## Known Errors
+Importing large domain road-networks in the ENU coordinate system involves misalignment errors whenever there is a change in the reference LLA base station. This change in base stations can improve the accuracy of networks over a small range network, but will introduce edge mismatch errors
+
+The error induced in LLA to ENU transformation is smaller than in LL to UTM transformation.
 
 
 # Installation

@@ -7,6 +7,16 @@
 % Modified: 2023-02-14 by SBrennan@psu.edu
 % - Better comments
 % - Better organization
+%
+% One of the distance() function errors should be caused by the MATLAB map toolbox: 
+% To fix it, simply replace two places of
+%  flat = ecc2flat(ellipsoid);
+% into 
+%  flat = ecc2flat(ellipsoid(2));
+% in the  ~\"your matlab installation folder"\toolbox\map\map\private\geodesicinv.m
+%
+% To find this location, type "which distance" - it is likely in the same
+% folder
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear all
@@ -98,10 +108,10 @@ geobasemap satellite
 % 'rh' — Rhumb line distances are computed on either a sphere or ellipsoid.
 %  On a Mercator projection map, any rhumb line is a straight line; a rhumb line can be drawn on such a map between any two points on Earth without going off the edge of the map
 
-% [GeoD_Testtrack_to_Bedfold,~] = distance('gc',latTestTrack,lonTestTrack,latBedfold,lonBedfold); %referenceEllipsoid('wgs84'));
+[GeoD_Testtrack_to_Bedfold,~] = distance('gc',latTestTrack,lonTestTrack,latBedfold,lonBedfold, referenceEllipsoid('wgs84'));
 
-refEllipse = referenceEllipsoid('wgs84','m');
-[GeoD_Testtrack_to_Bedfold,~] = distance(latTestTrack,lonTestTrack,latBedfold,lonBedfold,refEllipse);
+% refEllipse = referenceEllipsoid('wgs84','m');
+% [GeoD_Testtrack_to_Bedfold,~] = distance(latTestTrack,lonTestTrack,latBedfold,lonBedfold,refEllipse);
 
 % pos1     = [latTestTrack, lonTestTrack];
 % pos2     = [latBedfold, lonBedfold];
