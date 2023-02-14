@@ -100,7 +100,7 @@ geobasemap satellite
 
 % [GeoD_Testtrack_to_Bedfold,~] = distance('gc',latTestTrack,lonTestTrack,latBedfold,lonBedfold); %referenceEllipsoid('wgs84'));
 
-refEllipse = referenceEllipsoid('wgs84','km');
+refEllipse = referenceEllipsoid('wgs84','m');
 [GeoD_Testtrack_to_Bedfold,~] = distance(latTestTrack,lonTestTrack,latBedfold,lonBedfold,refEllipse);
 
 % pos1     = [latTestTrack, lonTestTrack];
@@ -109,8 +109,6 @@ refEllipse = referenceEllipsoid('wgs84','km');
 % SPHEROID = referenceEllipsoid('wgs84', 'km'); % // Reference ellipsoid. You can enter 'km' or 'm'    
 % [N, E]   = geodetic2ned(pos1(1), pos1(2), h, pos2(1), pos2(2), h, SPHEROID);
 % GeoD_Testtrack_to_Bedfold = norm([N, E]); 
-
-
 
 ENUD_Testtrack_to_Bedfold = sqrt((xEast_TestTrack-xEast_Bedfold).^2+(yNorth_TestTrack-yNorth_Bedfold).^2+(zUp_TestTrack-zUp_Bedfold).^2)
 distance_diff = GeoD_Testtrack_to_Bedfold - ENUD_Testtrack_to_Bedfold
@@ -200,19 +198,19 @@ ylabel('distance difference [m]')
 
 GeoDistance_Testtrack_to_Bedfold(end) - GeoD_Testtrack_to_Bedfold
 %------------------------------------------------------------------
-% Compare 4: test the accuray of distance() function for two close points, which use Haversine formula to calculate the great circle distance, 
+%% Compare 4: test the accuray of distance() function for two close points, which use Haversine formula to calculate the great circle distance, 
 % The calculate accuracy of small range point is low
  %addpath('geographiclib_toolbox_1.50')
 
 LatLonTwoPoint = LatLon([2,13],:)
-LatLonTwoPoint = [40 -77 ;40 -77.000001]
+% LatLonTwoPoint = [40 -77 ;40 -77.000001]
 earth = referenceSphere('Earth');
 [E_TwoPoint,N_TwoPoint,U_TwoPoint ]= geodetic2enu(LatLonTwoPoint(:,1),LatLonTwoPoint(:,2),zeros(size(LatLonTwoPoint(2,:)))',LatLonTwoPoint(1,1),LatLonTwoPoint(1,2),0,earth); %earth,,wgs84Ellipsoid
 ENU_TwoPoint = [E_TwoPoint,N_TwoPoint,U_TwoPoint ];
-[GeoD_TwoPoint,~,GeoD_TwoPoint_gc] = distance('gc',LatLonTwoPoint(1,:),LatLonTwoPoint(2,:),earth)
+[GeoD_TwoPoint_gc,~] = distance('gc',LatLonTwoPoint(1,:),LatLonTwoPoint(2,:),earth)
 %GeoD_TwoPoint_lib = geoddistance(LatLonTwoPoint(1,1), LatLonTwoPoint(1,2), LatLonTwoPoint(2,1), LatLonTwoPoint(2,2))
 ENUD_TwoPoint = sqrt(sum(diff(ENU_TwoPoint).^2))
-GeoD_TwoPoint - ENUD_TwoPoint
+% GeoD_TwoPoint - ENUD_TwoPoint
 GeoD_TwoPoint_gc - ENUD_TwoPoint % GeoD_TwoPoint_gc is the sphere greate circle distance 
 % GeoD_TwoPoint - GeoD_TwoPoint_lib
 sind((LatLonTwoPoint(1,1)-LatLonTwoPoint(2,1))/2).^2
