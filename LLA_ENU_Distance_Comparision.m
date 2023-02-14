@@ -4,11 +4,18 @@
 % 
 % Author:       Liming
 % Created Date: 2020-07-11
+% Modified: 2023-02-14 by SBrennan@psu.edu
+% - Better comments
+% - Better organization
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear all
 close all
-%generate some data 
+
+addpath('Data')
+addpath(genpath('Utilities'));
+
+%% Load and generate some data 
 LatLon = [];
 load('LLData.mat'); % LL data of I99 segment from Altoona to State College, data
 %interval is 0.1m
@@ -79,22 +86,38 @@ else
     text(latBedfold,lonBedfold,'State College');
 end
 %text(lanAtlanta,lonAtlanta,'Atlanta');
-geobasemap colorterrain
-geobasemap landcover
-%----------------------------------------------------
+%geobasemap colorterrain
+%geobasemap landcover
+geobasemap satellite
+
+%% ----------------------------------------------------
 % compare 1: Calculate the geodesic distance and Euclidean distance of start to end of
 % the trajectory 
 % 'gc' — Great circle distances are computed on a sphere and geodesic distances are computed on an ellipsoid.
 % 
 % 'rh' — Rhumb line distances are computed on either a sphere or ellipsoid.
 %  On a Mercator projection map, any rhumb line is a straight line; a rhumb line can be drawn on such a map between any two points on Earth without going off the edge of the map
-[GeoD_Testtrack_to_Bedfold,~, GeoD_Testtrack_to_Bedfold_gc]= distance('gc',latTestTrack,lonTestTrack,latBedfold,lonBedfold,wgs84Ellipsoid)
+
+% [GeoD_Testtrack_to_Bedfold,~] = distance('gc',latTestTrack,lonTestTrack,latBedfold,lonBedfold); %referenceEllipsoid('wgs84'));
+
+refEllipse = referenceEllipsoid('wgs84','km');
+[GeoD_Testtrack_to_Bedfold,~] = distance(latTestTrack,lonTestTrack,latBedfold,lonBedfold,refEllipse);
+
+% pos1     = [latTestTrack, lonTestTrack];
+% pos2     = [latBedfold, lonBedfold];
+% h        = 0;                                 % // altitude                         
+% SPHEROID = referenceEllipsoid('wgs84', 'km'); % // Reference ellipsoid. You can enter 'km' or 'm'    
+% [N, E]   = geodetic2ned(pos1(1), pos1(2), h, pos2(1), pos2(2), h, SPHEROID);
+% GeoD_Testtrack_to_Bedfold = norm([N, E]); 
+
+
+
 ENUD_Testtrack_to_Bedfold = sqrt((xEast_TestTrack-xEast_Bedfold).^2+(yNorth_TestTrack-yNorth_Bedfold).^2+(zUp_TestTrack-zUp_Bedfold).^2)
 distance_diff = GeoD_Testtrack_to_Bedfold - ENUD_Testtrack_to_Bedfold
 %----------------------------------------
 
-% compare 2: calculate the interval distance and the sum of them to get the station
-[GeoInterval_Testtrack_to_Bedfold,~] = distance('gc',[latTestTrack_to_Bedfold(1:end-1) lonTestTrack_to_Bedfold(1:end-1)],[latTestTrack_to_Bedfold(2:end) lonTestTrack_to_Bedfold(2:end)],wgs84Ellipsoid);
+%% compare 2: calculate the interval distance and the sum of them to get the station
+[GeoInterval_Testtrack_to_Bedfold,~] = distance('gc',[latTestTrack_to_Bedfold(1:end-1) lonTestTrack_to_Bedfold(1:end-1)],[latTestTrack_to_Bedfold(2:end) lonTestTrack_to_Bedfold(2:end)]); %,wgs84Ellipsoid);
 % [GeoInterval_Testtrack_to_Bedfold,~] = distance('gc',LatLon(1:end-1,:),LatLon(2:end,:),wgs84Ellipsoid);
 GeoStation_Testtrack_to_Bedfold = [0; cumsum(GeoInterval_Testtrack_to_Bedfold)];
 
@@ -136,7 +159,7 @@ station_error = GeoStation_Testtrack_to_Bedfold(end) - ENUStation_Testtrack_to_B
 % compare 3: Geodecis distance and Euclidean distance from each point of
 % the trajectory to the start point
 
-[GeoDistance_Testtrack_to_Bedfold,~] = distance('gc',repmat([latTestTrack_to_Bedfold(1) lonTestTrack_to_Bedfold(1)],length(latTestTrack_to_Bedfold),1),[latTestTrack_to_Bedfold lonTestTrack_to_Bedfold],wgs84Ellipsoid);
+[GeoDistance_Testtrack_to_Bedfold,~] = distance('gc',repmat([latTestTrack_to_Bedfold(1) lonTestTrack_to_Bedfold(1)],length(latTestTrack_to_Bedfold),1),[latTestTrack_to_Bedfold lonTestTrack_to_Bedfold]); %,wgs84Ellipsoid);
 
 ENUDistance_Testtrack_to_Bedfold = sqrt((xEast_TestTrack_to_Bedfold-xEast_TestTrack_to_Bedfold(1)).^2+...
                                     (yNorth_TestTrack_to_Bedfold - yNorth_TestTrack_to_Bedfold(1)).^2+(zUp_TestTrack_to_Bedfold - zUp_TestTrack_to_Bedfold(1)).^2);
